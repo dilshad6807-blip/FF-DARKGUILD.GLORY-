@@ -1,31 +1,91 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FF-DARKGUILD</title>
+<title>FF-DARKGUILD.GLORY</title>
 <style>
-body {
-  background: #080808;
-  color: white;
-  font-family: Arial;
-  text-align: center;
-  padding: 40px 15px;
+*{box-sizing:border-box}
+body{
+ margin:0;
+ font-family:Arial,sans-serif;
+ background:#080808;
+ color:white;
+ text-align:center;
 }
-h1 { color: #ff3030; }
-button {
-  background: #ff3030;
-  color: white;
-  padding: 14px 25px;
-  border: 0;
-  border-radius: 8px;
+header{
+ background:#151515;
+ padding:22px 10px;
+ border-bottom:2px solid #ffb000;
 }
+h1{color:#ffb000;margin:5px}
+.subtitle{color:#aaa}
+.container{padding:25px 15px}
+.card{
+ background:#171717;
+ border:1px solid #444;
+ border-radius:14px;
+ padding:22px;
+ margin:18px auto;
+ max-width:420px;
+}
+h2{color:#ffb000}
+input{
+ width:100%;
+ padding:13px;
+ margin:9px 0;
+ border-radius:7px;
+ border:1px solid #555;
+ background:#080808;
+ color:white;
+}
+button{
+ width:100%;
+ padding:13px;
+ margin-top:12px;
+ background:#ffb000;
+ border:0;
+ border-radius:7px;
+ font-weight:bold;
+ font-size:16px;
+}
+.offer{color:#00e676;font-weight:bold}
+footer{padding:20px;color:#888}
 </style>
 </head>
 <body>
-<h1>FF-DARKGUILD</h1>
+<header>
+<h1>🔥 FF-DARKGUILD.GLORY</h1>
+<p class="subtitle">YOUR GLORY. OUR MISSION.</p>
+</header>
+
+<div class="container">
+<div class="card">
 <h2>WELCOME TO DARK GLORY</h2>
-<p>Your Glory Delivery Portal</p>
-<button>Get Started</button>
+<p>Free Fire Glory Delivery Service</p>
+<p class="offer">🎁 ONE TIME WELCOME OFFER</p>
+<h2>2,00,000 GLORY FREE</h2>
+<p>Available once per eligible user.</p>
+</div>
+
+<div class="card">
+<h2>USER LOGIN</h2>
+<input type="text" placeholder="Enter Free Fire UID">
+<input type="text" placeholder="Enter Player Name">
+<button onclick="alert('Login system will be connected with Firebase soon!')">CONTINUE</button>
+</div>
+
+<div class="card">
+<h2>GLORY DELIVERY</h2>
+<p>Manual delivery by authorized team.</p>
+<p>Delivery is subject to verification.</p>
+</div>
+</div>
+
+<footer>
+© 2026 FF-DARKGUILD.GLORY
+</footer>
 </body>
 </html>
+
