@@ -1,10 +1,12 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FF-DARKGUILD.GLORY</title>
+
 <style>
 *{box-sizing:border-box}
 body{
@@ -19,9 +21,8 @@ header{
  padding:22px 10px;
  border-bottom:2px solid #ffb000;
 }
-h1{color:#ffb000;margin:5px}
-.subtitle{color:#aaa}
-.container{padding:25px 15px}
+h1,h2{color:#ffb000}
+.container{padding:20px 15px}
 .card{
  background:#171717;
  border:1px solid #444;
@@ -30,7 +31,6 @@ h1{color:#ffb000;margin:5px}
  margin:18px auto;
  max-width:420px;
 }
-h2{color:#ffb000}
 input{
  width:100%;
  padding:13px;
@@ -42,7 +42,7 @@ input{
 }
 button{
  width:100%;
- padding:13px;
+ padding:14px;
  margin-top:12px;
  background:#ffb000;
  border:0;
@@ -50,30 +50,56 @@ button{
  font-weight:bold;
  font-size:16px;
 }
+.google{
+ background:white;
+ color:#222;
+}
 .offer{color:#00e676;font-weight:bold}
+.hidden{display:none}
 footer{padding:20px;color:#888}
 </style>
 </head>
+
 <body>
+
 <header>
 <h1>🔥 FF-DARKGUILD.GLORY</h1>
-<p class="subtitle">YOUR GLORY. OUR MISSION.</p>
+<p>YOUR GLORY. OUR MISSION.</p>
 </header>
 
 <div class="container">
+
 <div class="card">
 <h2>WELCOME TO DARK GLORY</h2>
 <p>Free Fire Glory Delivery Service</p>
 <p class="offer">🎁 ONE TIME WELCOME OFFER</p>
 <h2>2,00,000 GLORY FREE</h2>
-<p>Available once per eligible user.</p>
+<p>For one eligible person only.</p>
 </div>
 
-<div class="card">
-<h2>USER LOGIN</h2>
-<input type="text" placeholder="Enter Free Fire UID">
-<input type="text" placeholder="Enter Player Name">
-<button onclick="alert('Login system will be connected with Firebase soon!')">CONTINUE</button>
+<div class="card" id="loginBox">
+<h2>GOOGLE LOGIN</h2>
+<button class="google" id="googleLogin">
+🌐 Continue with Google
+</button>
+<p id="message"></p>
+</div>
+
+<div class="card hidden" id="profileBox">
+<h2>PLAYER REGISTRATION</h2>
+<p id="welcome"></p>
+
+<input id="playerUID"
+placeholder="Enter Free Fire UID"
+type="number">
+
+<input id="playerName"
+placeholder="Enter Free Fire Player Name">
+
+<button id="savePlayer">CONTINUE</button>
+<button id="logout">LOGOUT</button>
+
+<p id="profileMessage"></p>
 </div>
 
 <div class="card">
@@ -81,21 +107,91 @@ footer{padding:20px;color:#888}
 <p>Manual delivery by authorized team.</p>
 <p>Delivery is subject to verification.</p>
 </div>
+
 </div>
 
 <footer>
 © 2026 FF-DARKGUILD.GLORY
 </footer>
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
+<script type="module">
+
+import { initializeApp } from
+"https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+
+import {
+getAuth,
+GoogleAuthProvider,
+signInWithPopup,
+onAuthStateChanged,
+signOut
+} from
+"https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
 const firebaseConfig = {
-  apiKey: "AIzaSyDSJ0QGd8y9XcT5y0QohzsgXOVWeP9hktA",
-  authDomain: "ff-darkguild.firebaseapp.com",
-  projectId: "ff-darkguild",
-  storageBucket: "ff-darkguild.firebasestorage.app",
-  messagingSenderId: "991716089948",
-  appId: "1:991716089948:web:7176044580a96b15b64699",
-  measurementId: "G-HKWP6VSF7X"
+apiKey: "AIzaSyDSJ0QGd8y9XcT5y0QohzsgXOVWeP9hktA",
+authDomain: "ff-darkguild.firebaseapp.com",
+projectId: "ff-darkguild",
+storageBucket: "ff-darkguild.firebasestorage.app",
+messagingSenderId: "991716089948",
+appId: "1:991716089948:web:7176044580a96b15b64699",
+measurementId: "G-HKWP6VSF7X"
 };
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+const loginBox = document.getElementById("loginBox");
+const profileBox = document.getElementById("profileBox");
+const message = document.getElementById("message");
+
+document.getElementById("googleLogin")
+.addEventListener("click", async () => {
+try {
+message.textContent = "Opening Google Login...";
+await signInWithPopup(auth, provider);
+} catch(error) {
+message.textContent = error.message;
+}
+});
+
+onAuthStateChanged(auth, user => {
+if(user) {
+loginBox.classList.add("hidden");
+profileBox.classList.remove("hidden");
+
+document.getElementById("welcome").textContent =
+"Welcome " + (user.displayName || user.email);
+} else {
+loginBox.classList.remove("hidden");
+profileBox.classList.add("hidden");
+}
+});
+
+document.getElementById("savePlayer")
+.addEventListener("click", () => {
+
+const uid = document.getElementById("playerUID").value.trim();
+const name = document.getElementById("playerName").value.trim();
+
+if(!uid || !name) {
+document.getElementById("profileMessage").textContent =
+"Please enter your Free Fire UID and Player Name.";
+return;
+}
+
+document.getElementById("profileMessage").textContent =
+"Details entered successfully. Database connection is the next step.";
+
+});
+
+document.getElementById("logout")
+.addEventListener("click", async () => {
+await signOut(auth);
+});
+
+</script>
+
 </body>
 </html>
-
