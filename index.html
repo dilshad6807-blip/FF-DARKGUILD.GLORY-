@@ -1,31 +1,30 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>FF-DARKGUILD.GLORY</title>
 
 <style>
 *{box-sizing:border-box}
 body{
  margin:0;
- font-family:Arial,sans-serif;
  background:#080808;
  color:white;
+ font-family:Arial,sans-serif;
  text-align:center;
 }
 header{
+ padding:24px 10px;
  background:#151515;
- padding:22px 10px;
  border-bottom:2px solid #ffb000;
 }
 h1,h2{color:#ffb000}
-.container{padding:20px 15px}
+.container{padding:20px 12px}
 .card{
  background:#171717;
- border:1px solid #444;
+ border:1px solid #555;
  border-radius:14px;
  padding:22px;
  margin:18px auto;
@@ -33,12 +32,12 @@ h1,h2{color:#ffb000}
 }
 input{
  width:100%;
- padding:13px;
+ padding:14px;
  margin:9px 0;
- border-radius:7px;
- border:1px solid #555;
  background:#080808;
  color:white;
+ border:1px solid #777;
+ border-radius:7px;
 }
 button{
  width:100%;
@@ -50,12 +49,9 @@ button{
  font-weight:bold;
  font-size:16px;
 }
-.google{
- background:white;
- color:#222;
-}
-.offer{color:#00e676;font-weight:bold}
+.google{background:white;color:#222}
 .hidden{display:none}
+.offer{color:#00e676}
 footer{padding:20px;color:#888}
 </style>
 </head>
@@ -74,13 +70,13 @@ footer{padding:20px;color:#888}
 <p>Free Fire Glory Delivery Service</p>
 <p class="offer">🎁 ONE TIME WELCOME OFFER</p>
 <h2>2,00,000 GLORY FREE</h2>
-<p>For one eligible person only.</p>
+<p>One eligible person only.</p>
 </div>
 
 <div class="card" id="loginBox">
 <h2>GOOGLE LOGIN</h2>
 <button class="google" id="googleLogin">
-🌐 Continue with Google
+🌐 CONTINUE WITH GOOGLE
 </button>
 <p id="message"></p>
 </div>
@@ -90,13 +86,14 @@ footer{padding:20px;color:#888}
 <p id="welcome"></p>
 
 <input id="playerUID"
-placeholder="Enter Free Fire UID"
-type="number">
+type="text"
+placeholder="Enter Free Fire UID">
 
 <input id="playerName"
-placeholder="Enter Free Fire Player Name">
+type="text"
+placeholder="Enter Player Name">
 
-<button id="savePlayer">CONTINUE</button>
+<button id="savePlayer">SAVE PLAYER DETAILS</button>
 <button id="logout">LOGOUT</button>
 
 <p id="profileMessage"></p>
@@ -105,14 +102,12 @@ placeholder="Enter Free Fire Player Name">
 <div class="card">
 <h2>GLORY DELIVERY</h2>
 <p>Manual delivery by authorized team.</p>
-<p>Delivery is subject to verification.</p>
+<p>Delivery after verification.</p>
 </div>
 
 </div>
 
-<footer>
-© 2026 FF-DARKGUILD.GLORY
-</footer>
+<footer>© 2026 FF-DARKGUILD.GLORY</footer>
 
 <script type="module">
 
@@ -120,78 +115,125 @@ import { initializeApp } from
 "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 
 import {
-getAuth,
-GoogleAuthProvider,
-signInWithPopup,
-onAuthStateChanged,
-signOut
+ getAuth,
+ GoogleAuthProvider,
+ signInWithPopup,
+ onAuthStateChanged,
+ signOut
 } from
 "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
+import {
+ getFirestore,
+ doc,
+ setDoc,
+ getDoc,
+ serverTimestamp
+} from
+"https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
 const firebaseConfig = {
-apiKey: "AIzaSyDSJ0QGd8y9XcT5y0QohzsgXOVWeP9hktA",
-authDomain: "ff-darkguild.firebaseapp.com",
-projectId: "ff-darkguild",
-storageBucket: "ff-darkguild.firebasestorage.app",
-messagingSenderId: "991716089948",
-appId: "1:991716089948:web:7176044580a96b15b64699",
-measurementId: "G-HKWP6VSF7X"
+ apiKey: "AIzaSyDSJ0QGd8y9XcT5y0QohzsgXOVWeP9hktA",
+ authDomain: "ff-darkguild.firebaseapp.com",
+ projectId: "ff-darkguild",
+ storageBucket: "ff-darkguild.firebasestorage.app",
+ messagingSenderId: "991716089948",
+ appId: "1:991716089948:web:7176044580a96b15b64699",
+ measurementId: "G-HKWP6VSF7X"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
 const loginBox = document.getElementById("loginBox");
 const profileBox = document.getElementById("profileBox");
 const message = document.getElementById("message");
+const profileMessage = document.getElementById("profileMessage");
 
 document.getElementById("googleLogin")
 .addEventListener("click", async () => {
-try {
-message.textContent = "Opening Google Login...";
-await signInWithPopup(auth, provider);
-} catch(error) {
-message.textContent = error.message;
-}
+ try {
+  message.textContent = "Connecting to Google...";
+  await signInWithPopup(auth, provider);
+  message.textContent = "Login successful!";
+ } catch(error) {
+  message.textContent = error.message;
+ }
 });
 
-onAuthStateChanged(auth, user => {
-if(user) {
-loginBox.classList.add("hidden");
-profileBox.classList.remove("hidden");
+onAuthStateChanged(auth, async user => {
+ if(user) {
+  loginBox.classList.add("hidden");
+  profileBox.classList.remove("hidden");
 
-document.getElementById("welcome").textContent =
-"Welcome " + (user.displayName || user.email);
-} else {
-loginBox.classList.remove("hidden");
-profileBox.classList.add("hidden");
-}
+  document.getElementById("welcome").textContent =
+   "Welcome " + (user.displayName || user.email);
+
+  try {
+   const ref = doc(db,"users",user.uid);
+   const snapshot = await getDoc(ref);
+
+   if(snapshot.exists()) {
+    const data = snapshot.data();
+    document.getElementById("playerUID").value = data.uid || "";
+    document.getElementById("playerName").value = data.playerName || "";
+   }
+  } catch(error) {
+   profileMessage.textContent = error.message;
+  }
+
+ } else {
+  loginBox.classList.remove("hidden");
+  profileBox.classList.add("hidden");
+ }
 });
 
 document.getElementById("savePlayer")
-.addEventListener("click", () => {
+.addEventListener("click", async () => {
 
-const uid = document.getElementById("playerUID").value.trim();
-const name = document.getElementById("playerName").value.trim();
+ const user = auth.currentUser;
+ const uid = document.getElementById("playerUID").value.trim();
+ const name = document.getElementById("playerName").value.trim();
 
-if(!uid || !name) {
-document.getElementById("profileMessage").textContent =
-"Please enter your Free Fire UID and Player Name.";
-return;
-}
+ if(!user) {
+  profileMessage.textContent = "Please login first.";
+  return;
+ }
 
-document.getElementById("profileMessage").textContent =
-"Details entered successfully. Database connection is the next step.";
+ if(!uid || !name) {
+  profileMessage.textContent = "Enter UID and Player Name.";
+  return;
+ }
 
+ if(!/^\d{5,20}$/.test(uid)) {
+  profileMessage.textContent = "Enter a valid UID.";
+  return;
+ }
+
+ try {
+  await setDoc(doc(db,"users",user.uid),{
+   uid:uid,
+   playerName:name,
+   email:user.email || "",
+   displayName:user.displayName || "",
+   updatedAt:serverTimestamp()
+  });
+
+  profileMessage.textContent =
+   "Player details saved successfully!";
+
+ } catch(error) {
+  profileMessage.textContent = "Error: " + error.message;
+ }
 });
 
 document.getElementById("logout")
 .addEventListener("click", async () => {
-await signOut(auth);
+ await signOut(auth);
 });
 
 </script>
-
 </body>
 </html>
