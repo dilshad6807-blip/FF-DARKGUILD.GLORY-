@@ -1,232 +1,31 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FF-DARKGUILD.GLORY</title>
+<title>FF-DARKGUILD</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#090909;color:white;font-family:Arial,sans-serif}
-header{text-align:center;padding:25px 12px;background:#151515;border-bottom:2px solid #e32626}
-h1{color:#ff3030;margin:0;font-size:27px}
-header p{color:#bbb}
-main{max-width:650px;margin:20px auto;padding:15px}
-.card{background:#171717;border:1px solid #333;border-radius:14px;padding:18px;margin-bottom:18px}
-h2{color:#ff4242;margin-top:0}
-input,button{width:100%;padding:13px;margin:7px 0;border-radius:8px;border:1px solid #444;font-size:15px}
-input{background:#080808;color:white}
-button{background:#e32626;color:white;border:0;font-weight:bold;cursor:pointer}
-button.secondary{background:#333}
-.note{color:#bbb;font-size:13px;line-height:1.5}
-#message{color:#ffbaba;white-space:pre-wrap}
-.order{background:#242424;padding:12px;border-radius:8px;margin:9px 0;overflow-wrap:anywhere}
-.hidden{display:none}
-footer{text-align:center;color:#888;padding:20px;font-size:12px}
+body {
+  background: #080808;
+  color: white;
+  font-family: Arial;
+  text-align: center;
+  padding: 40px 15px;
+}
+h1 { color: #ff3030; }
+button {
+  background: #ff3030;
+  color: white;
+  padding: 14px 25px;
+  border: 0;
+  border-radius: 8px;
+}
 </style>
 </head>
 <body>
-<header>
-<h1>FF-DARKGUILD.GLORY</h1>
-<p>Glory Service • Manual Delivery</p>
-</header>
-
-<main>
-<div class="card">
-<h2>Welcome Offer</h2>
-<p>First eligible order: <b style="color:#ff4242">200,000 Glory FREE</b></p>
-<p class="note">One-time offer per eligible account. Admin verification required. Not an automatic game delivery service.</p>
-</div>
-
-<div class="card">
-<h2>Account Login / Register</h2>
-<input id="email" type="email" placeholder="Email address">
-<input id="password" type="password" placeholder="Password">
-<button id="registerBtn">Create Account</button>
-<button id="loginBtn" class="secondary">Login</button>
-<button id="logoutBtn" class="secondary hidden">Logout</button>
-<p id="accountInfo" class="note">Please login or create an account.</p>
-</div>
-
-<div id="customerArea" class="hidden">
-<div class="card">
-<h2>Place Glory Order</h2>
-<input id="playerId" placeholder="Free Fire Player UID">
-<input id="quantity" type="number" min="1" max="10000000" placeholder="Glory quantity">
-<button id="orderBtn">Submit Order</button>
-<p class="note">Orders are sent for manual review. Do not share your game password or OTP.</p>
-</div>
-
-<div class="card">
-<h2>My Orders</h2>
-<div id="myOrders">Login to view your orders.</div>
-</div>
-</div>
-
-<div id="adminArea" class="hidden">
-<div class="card">
-<h2>Admin Panel</h2>
-<p class="note">Review orders and update delivery status after manual verification.</p>
-<button id="refreshAdmin" class="secondary">Refresh Orders</button>
-<div id="allOrders">Admin orders will appear here.</div>
-</div>
-</div>
-
-<p id="message"></p>
-</main>
-
-<footer>FF-DARKGUILD.GLORY • Manual order processing</footer>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-import {
-  getAuth, createUserWithEmailAndPassword,
-  signInWithEmailAndPassword, signOut, onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-import {
-  getFirestore, collection, addDoc, query, where,
-  getDocs, doc, updateDoc, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDSJ0QGd8y9XcT5y0QohzsgXOVWeP9hktA",
-  authDomain: "ff-darkguild.firebaseapp.com",
-  projectId: "ff-darkguild",
-  storageBucket: "ff-darkguild.firebasestorage.app",
-  messagingSenderId: "991716089948",
-  appId: "1:991716089948:web:df9f8d85778579bbb64699",
-  measurementId: "G-9B1C22V1ET"
-};
-
-const ADMIN_UID = "uYHH68MxWqTKjsH1bN4pAzIBvFJ3";
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-const el = id => document.getElementById(id);
-const message = text => el("message").textContent = text;
-
-el("registerBtn").onclick = async () => {
-  try {
-    await createUserWithEmailAndPassword(
-      auth, el("email").value.trim(), el("password").value
-    );
-    message("Account created successfully.");
-  } catch(e) { message(e.message); }
-};
-
-el("loginBtn").onclick = async () => {
-  try {
-    await signInWithEmailAndPassword(
-      auth, el("email").value.trim(), el("password").value
-    );
-    message("Login successful.");
-  } catch(e) { message(e.message); }
-};
-
-el("logoutBtn").onclick = async () => {
-  await signOut(auth);
-  message("Logged out.");
-};
-
-el("orderBtn").onclick = async () => {
-  const user = auth.currentUser;
-  const playerId = el("playerId").value.trim();
-  const quantity = Number(el("quantity").value);
-
-  if (!user) return message("Please login first.");
-  if (!/^\d{6,20}$/.test(playerId)) return message("Enter a valid Player UID.");
-  if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > 10000000)
-    return message("Enter a quantity from 1 to 10,000,000.");
-
-  try {
-    await addDoc(collection(db, "orders"), {
-      ownerUid: user.uid,
-      playerId,
-      quantity,
-      status: "pending",
-      deliveryMethod: "manual",
-      createdAt: serverTimestamp()
-    });
-    message("Order submitted. It is waiting for manual review.");
-    el("playerId").value = "";
-    el("quantity").value = "";
-    await loadMine();
-  } catch(e) { message("Order could not be submitted: " + e.message); }
-};
-
-async function loadMine() {
-  const user = auth.currentUser;
-  if (!user) return;
-  try {
-    const q = query(collection(db, "orders"), where("ownerUid", "==", user.uid));
-    const result = await getDocs(q);
-    el("myOrders").innerHTML = "";
-    if (result.empty) {
-      el("myOrders").textContent = "No orders yet.";
-      return;
-    }
-    result.forEach(item => {
-      const data = item.data();
-      const div = document.createElement("div");
-      div.className = "order";
-      div.textContent = "UID: " + data.playerId + " | Glory: " +
-        data.quantity + " | Status: " + data.status;
-      el("myOrders").appendChild(div);
-    });
-  } catch(e) { message("Could not load your orders: " + e.message); }
-}
-
-async function loadAll() {
-  try {
-    const result = await getDocs(collection(db, "orders"));
-    el("allOrders").innerHTML = "";
-    if (result.empty) {
-      el("allOrders").textContent = "No orders found.";
-      return;
-    }
-    result.forEach(item => {
-      const data = item.data();
-      const div = document.createElement("div");
-      div.className = "order";
-      const details = document.createElement("p");
-      details.textContent = "Player UID: " + data.playerId +
-        " | Glory: " + data.quantity + " | Status: " + data.status;
-      const btn = document.createElement("button");
-      btn.textContent = "Mark Completed";
-      btn.onclick = async () => {
-        try {
-          await updateDoc(doc(db, "orders", item.id), {status:"completed"});
-          message("Order marked completed.");
-          await loadAll();
-        } catch(e) { message("Update failed: " + e.message); }
-      };
-      div.append(details, btn);
-      el("allOrders").appendChild(div);
-    });
-  } catch(e) { message("Admin orders could not load: " + e.message); }
-}
-
-el("refreshAdmin").onclick = loadAll;
-
-onAuthStateChanged(auth, async user => {
-  el("customerArea").classList.toggle("hidden", !user);
-  el("logoutBtn").classList.toggle("hidden", !user);
-  el("registerBtn").classList.toggle("hidden", !!user);
-  el("loginBtn").classList.toggle("hidden", !!user);
-  el("accountInfo").textContent = user ? "Logged in: " + user.email : "Please login or create an account.";
-
-  const isAdmin = !!user && user.uid === ADMIN_UID;
-  el("adminArea").classList.toggle("hidden", !isAdmin);
-
-  if (user) {
-    await loadMine();
-    if (isAdmin) await loadAll();
-  } else {
-    el("myOrders").textContent = "Login to view your orders.";
-  }
-});
-</script>
+<h1>FF-DARKGUILD</h1>
+<h2>WELCOME TO DARK GLORY</h2>
+<p>Your Glory Delivery Portal</p>
+<button>Get Started</button>
 </body>
 </html>
